@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Для тебя ❤️</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #0a0a0d;
+    color: #f5f5f5;
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ─── Живой градиентный фон ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -20%;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(120,80,200,0.18), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(200,80,140,0.18), transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(80,140,200,0.12), transparent 50%);
+    z-index: -1;
+    animation: bgMove 25s ease-in-out infinite alternate;
+  }
+  @keyframes bgMove {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-4%, 4%) scale(1.1); }
+  }
+
+  /* ─── Шапка ─── */
+  header {
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+    overflow: hidden;
+  }
+
+  .slideshow { position: absolute; inset: 0; z-index: 0; }
+  .slideshow .slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(1.1);
+    filter: blur(2px) brightness(0.35);
+    transition: opacity 2s ease, transform 8s ease;
+    animation: kenburns 8s ease-in-out infinite;
+  }
+  .slideshow .slide.active { opacity: 1; }
+
+  @keyframes kenburns {
+    from { transform: scale(1.05); }
+    to   { transform: scale(1.15); }
+  }
+
+  .slideshow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(10,10,13,0.2) 0%, rgba(10,10,13,0.85) 75%, #0a0a0d 100%);
+  }
+
+  header .content { position: relative; z-index: 2; }
+
+  header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    background: linear-gradient(120deg, #fff 20%, #ffc8dd 50%, #fff 80%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 6s linear infinite, fadeUp 1.6s ease forwards 0.3s;
+    opacity: 0;
+  }
+  @keyframes shine { to { background-position: 200% center; } }
+
+  header .subtitle {
+    margin-top: 22px;
+    font-size: clamp(0.85rem, 2.4vw, 1rem);
+    font-weight: 300;
+    color: #c8c8d4;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1.6s ease forwards 0.9s;
+  }
+
+  .heart {
+    font-size: 2.2rem;
+    margin-top: 34px;
+    opacity: 0;
+    animation: fadeUp 1.6s ease forwards 1.4s, beat 1.8s ease-in-out infinite 3s;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #8888a0;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1.6s ease forwards 2s;
+    z-index: 2;
+  }
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(#8888a0, transparent);
+    margin: 15px auto 0;
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0%,100% { opacity: 0.3; transform: scaleY(0.6); }
+    50%     { opacity: 1; transform: scaleY(1); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.18); }
+  }
+
+  /* ─── Мозаика ─── */
+  .mosaic {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 260px;
+    gap: 40px;
+    padding: 120px 6vw 120px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .mosaic figure {
+    position: relative;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(60px) scale(0.94) rotate(var(--rot, 0deg));
+    transition:
+      opacity 1s cubic-bezier(.2,.8,.2,1),
+      transform 1s cubic-bezier(.2,.8,.2,1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mosaic figure.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(var(--rot, 0deg));
+  }
+
+  /* ─── Обёртка формы ─── */
+  .mosaic .shape {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    transition: transform 0.6s cubic-bezier(.2,.8,.2,1), box-shadow 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .mosaic figure:hover .shape {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 35px 80px rgba(0,0,0,0.65), 0 0 60px rgba(255,200,221,0.25);
+    z-index: 5;
+  }
+
+  /* ─── Формы ─── */
+  /* 1 и 8 — большой скруглённый прямоугольник */
+  .mosaic figure:nth-child(1) .shape,
+  .mosaic figure:nth-child(8) .shape {
+    border-radius: 24px;
+  }
+
+  /* 2 — ЛЕПЕСТОК (мягкая асимметричная капля-лист) */
+  .mosaic figure:nth-child(2) .shape {
+    border-radius: 60% 40% 60% 40% / 55% 60% 40% 45%;
+  }
+
+  /* 6 — АРКА (полукруг сверху, прямые углы снизу) */
+  .mosaic figure:nth-child(6) .shape {
+    border-radius: 50% 50% 8px 8px / 45% 45% 8px 8px;
+  }
+
+  /* 3 и 7 — круг */
+  .mosaic figure:nth-child(3) .shape,
+  .mosaic figure:nth-child(7) .shape {
+    border-radius: 50%;
+  }
+
+  /* 4 — вертикальный овал */
+  .mosaic figure:nth-child(4) .shape {
+    border-radius: 50% / 42%;
+  }
+
+  /* 5 — «капля» сверху */
+  .mosaic figure:nth-child(5) .shape {
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  }
+
+  /* ─── Фото заполняет форму целиком ─── */
+  .mosaic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.96) saturate(1.05);
+    transition: filter 0.5s ease;
+    transform-origin: center center;
+    animation: breathe 9s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+  }
+
+  .mosaic figure:nth-child(1) img { animation-duration: 9s;   animation-delay: 0s; }
+  .mosaic figure:nth-child(2) img { animation-duration: 11s;  animation-delay: -2s; }
+  .mosaic figure:nth-child(3) img { animation-duration: 8.5s; animation-delay: -4s; }
+  .mosaic figure:nth-child(4) img { animation-duration: 10s;  animation-delay: -1s; }
+  .mosaic figure:nth-child(5) img { animation-duration: 9.5s; animation-delay: -3s; }
+  .mosaic figure:nth-child(6) img { animation-duration: 12s;  animation-delay: -5s; }
+  .mosaic figure:nth-child(7) img { animation-duration: 8s;   animation-delay: -2.5s; }
+  .mosaic figure:nth-child(8) img { animation-duration: 10.5s; animation-delay: -1.5s; }
+
+  .mosaic figure:hover img {
+    animation-play-state: paused;
+    transform: scale(1.04);
+    filter: brightness(1.05) saturate(1.15);
+  }
+
+  /* ─── Стикеры ─── */
+  .mosaic .sticker {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    z-index: 4;
+    transform: translateY(-10px) rotate(-15deg);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.5s ease;
+    pointer-events: none;
+  }
+
+  .mosaic figure.visible .sticker {
+    transform: translateY(0) rotate(-8deg);
+    opacity: 1;
+  }
+
+  .mosaic figure:hover .sticker {
+    transform: translateY(-4px) rotate(8deg) scale(1.15);
+    animation: wiggle 0.8s ease-in-out infinite alternate;
+  }
+
+  @keyframes wiggle {
+    from { transform: translateY(-4px) rotate(-6deg) scale(1.15); }
+    to   { transform: translateY(-4px) rotate(8deg) scale(1.15); }
+  }
+
+  /* ─── Раскладка ─── */
+  .mosaic figure:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 3; --rot: -2deg; }
+  .mosaic figure:nth-child(2) { grid-column: 3 / 4; grid-row: 1 / 2; --rot: 2deg; }
+  .mosaic figure:nth-child(3) { grid-column: 3 / 4; grid-row: 2 / 3; --rot: -1.5deg; }
+  .mosaic figure:nth-child(4) { grid-column: 1 / 2; grid-row: 3 / 4; --rot: 1.5deg; }
+  .mosaic figure:nth-child(5) { grid-column: 2 / 3; grid-row: 3 / 4; --rot: -2deg; }
+  .mosaic figure:nth-child(6) { grid-column: 3 / 4; grid-row: 3 / 4; --rot: 2.5deg; }
+  .mosaic figure:nth-child(7) { grid-column: 1 / 2; grid-row: 4 / 5; --rot: -1deg; }
+  .mosaic figure:nth-child(8) { grid-column: 2 / 4; grid-row: 4 / 6; --rot: 2deg; }
+
+  /* ─── Адаптив ─── */
+  @media (max-width: 1000px) {
+    .mosaic {
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 240px;
+      gap: 30px;
+      padding: 100px 5vw 80px;
+    }
+    .mosaic figure:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 2; --rot: -1deg; }
+    .mosaic figure:nth-child(2) { grid-column: 1 / 2; grid-row: 2 / 3; --rot: 1.5deg; }
+    .mosaic figure:nth-child(3) { grid-column: 2 / 3; grid-row: 2 / 3; --rot: -1.5deg; }
+    .mosaic figure:nth-child(4) { grid-column: 1 / 2; grid-row: 3 / 4; --rot: 1deg; }
+    .mosaic figure:nth-child(5) { grid-column: 2 / 3; grid-row: 3 / 4; --rot: -1deg; }
+    .mosaic figure:nth-child(6) { grid-column: 1 / 2; grid-row: 4 / 5; --rot: 1.5deg; }
+    .mosaic figure:nth-child(7) { grid-column: 2 / 3; grid-row: 4 / 5; --rot: -1.5deg; }
+    .mosaic figure:nth-child(8) { grid-column: 1 / 3; grid-row: 5 / 6; --rot: 1deg; }
+  }
+
+  @media (max-width: 560px) {
+    .mosaic {
+      grid-template-columns: 1fr;
+      grid-auto-rows: 340px;
+      gap: 30px;
+      padding: 60px 20px 70px;
+    }
+    .mosaic figure {
+      grid-column: 1 / -1 !important;
+      grid-row: auto !important;
+      --rot: 0deg !important;
+    }
+  }
+
+  /* ─── Лайтбокс ─── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+    z-index: 100;
+    padding: 20px;
+  }
+  .lightbox.open { opacity: 1; pointer-events: auto; }
+
+  .lightbox img {
+    max-width: 92vw;
+    max-height: 88vh;
+    border-radius: 10px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+    transform: scale(0.9);
+    transition: transform 0.5s cubic-bezier(.2,.8,.2,1);
+    animation: none;
+    object-fit: contain;
+  }
+  .lightbox.open img { transform: scale(1); }
+
+  .lightbox .close {
+    position: absolute;
+    top: 22px;
+    right: 28px;
+    font-size: 2.4rem;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.3s;
+    user-select: none;
+    line-height: 1;
+  }
+  .lightbox .close:hover { opacity: 1; transform: rotate(90deg); }
+
+  /* ─── Кнопка письма ─── */
+  .letter-section { text-align: center; padding: 0 20px 100px; }
+
+  #letter-btn {
+    position: relative;
+    padding: 18px 48px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(.2,.8,.2,1);
+    overflow: hidden;
+  }
+  #letter-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(255,200,221,0.25), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.8s ease;
+  }
+  #letter-btn:hover::before { transform: translateX(100%); }
+  #letter-btn:hover {
+    border-color: rgba(255,200,221,0.6);
+    box-shadow: 0 0 40px rgba(255,200,221,0.25);
+    transform: translateY(-3px);
+  }
+
+  /* ─── Модальное окно письма ─── */
+  #letter-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 300;
+    padding: 20px;
+  }
+  #letter-modal.open { opacity: 1; pointer-events: auto; }
+
+  .letter-content {
+    position: relative;
+    background: linear-gradient(150deg, #1c1c25 0%, #12121a 100%);
+    border: 1px solid rgba(255,200,221,0.18);
+    border-radius: 20px;
+    padding: 60px 50px;
+    max-width: 540px;
+    width: 100%;
+    text-align: center;
+    transform: scale(0.85) rotateX(15deg);
+    transform-origin: center top;
+    transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
+    box-shadow:
+      0 40px 100px rgba(0,0,0,0.7),
+      0 0 80px rgba(255,200,221,0.08) inset;
+  }
+  #letter-modal.open .letter-content { transform: scale(1) rotateX(0); }
+
+  .letter-content::before {
+    content: '❤';
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9bbd, #ffc8dd);
+    color: #fff;
+    font-size: 1.2rem;
+    line-height: 44px;
+    box-shadow: 0 10px 30px rgba(255,155,189,0.4);
+  }
+
+  .letter-content h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem;
+    font-weight: 300;
+    margin-bottom: 28px;
+    letter-spacing: 0.03em;
+    background: linear-gradient(120deg, #fff, #ffc8dd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .letter-content p {
+    color: #cfcfdb;
+    line-height: 1.9;
+    margin-bottom: 18px;
+    font-size: 1rem;
+  }
+  .letter-content .sign {
+    font-style: italic;
+    color: #9c9cae;
+    margin-top: 34px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+  }
+  .letter-close {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s, transform 0.3s;
+    user-select: none;
+    line-height: 1;
+    color: #fff;
+  }
+  .letter-close:hover { opacity: 1; transform: rotate(90deg); }
+
+  /* ─── Футер ─── */
+  footer {
+    text-align: center;
+    padding: 30px 20px 70px;
+    color: #6f6f78;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ─── Плавающие сердечки ─── */
+  .floating-heart {
+    position: fixed;
+    bottom: -40px;
+    font-size: 16px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatUp linear forwards;
+    z-index: 50;
+  }
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translateY(0) rotate(0); }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.5; }
+    100% { opacity: 0; transform: translateY(-115vh) rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="slideshow" id="slideshow"></div>
+    <div class="content">
+      <h1>Для тебя</h1>
+      <p class="subtitle">Каждый момент — сокровище</p>
+      <div class="heart">❤️</div>
+    </div>
+    <div class="scroll-hint">Листай вниз</div>
+  </header>
+
+  <section class="mosaic">
+    <figure><div class="shape"><img src="photos/1.jpg" alt=""></div><span class="sticker">🧸</span></figure>
+    <figure><div class="shape"><img src="photos/2.jpg" alt=""></div><span class="sticker">🌿</span></figure>
+    <figure><div class="shape"><img src="photos/3.jpg" alt=""></div><span class="sticker">🐰</span></figure>
+    <figure><div class="shape"><img src="photos/4.jpg" alt=""></div><span class="sticker">🐻</span></figure>
+    <figure><div class="shape"><img src="photos/5.jpg" alt=""></div><span class="sticker">💕</span></figure>
+    <figure><div class="shape"><img src="photos/6.jpg" alt=""></div><span class="sticker">✨</span></figure>
+    <figure><div class="shape"><img src="photos/7.jpg" alt=""></div><span class="sticker">🐇</span></figure>
+    <figure><div class="shape"><img src="photos/8.jpg" alt=""></div><span class="sticker">🧸</span></figure>
+  </section>
+
+  <div class="letter-section">
+    <button id="letter-btn">Открыть письмо 💌</button>
+  </div>
+
+  <footer>С любовью ❤️</footer>
+
+  <div class="lightbox" id="lightbox">
+    <span class="close" id="close">&times;</span>
+    <img src="" alt="" id="lightbox-img">
+  </div>
+
+  <div id="letter-modal">
+    <div class="letter-content">
+      <span class="letter-close">&times;</span>
+      <h2>Моей любимой</h2>
+      <p>Каждый день с тобой — это подарок. Спасибо, что ты рядом, за твою улыбку, за тепло, которое ты даришь.</p>
+      <p>Я тебя очень люблю ❤️</p>
+      <p class="sign">— Твой</p>
+    </div>
+  </div>
+
+<script>
+  /* ── Слайд-шоу ── */
+  const slideshowEl = document.getElementById('slideshow');
+  const slidePhotos = ['photos/1.jpg','photos/3.jpg','photos/5.jpg','photos/7.jpg'];
+  slidePhotos.forEach((src, i) => {
+    const d = document.createElement('div');
+    d.className = 'slide' + (i === 0 ? ' active' : '');
+    d.style.backgroundImage = `url('${src}')`;
+    slideshowEl.appendChild(d);
+  });
+  const slides = slideshowEl.querySelectorAll('.slide');
+  let currentSlide = 0;
+  setInterval(() => {
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % slides.length;
+    slides[currentSlide].classList.add('active');
+  }, 4000);
+
+  /* ── Появление фото ── */
+  const figures = document.querySelectorAll('.mosaic figure');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 120);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  figures.forEach(f => io.observe(f));
+
+  /* ── Лайтбокс ── */
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img');
+  const closeBtn = document.getElementById('close');
+
+  figures.forEach(fig => {
+    fig.addEventListener('click', () => {
+      lbImg.src = fig.querySelector('img').src;
+      lightbox.classList.add('open');
+    });
+  });
+  const closeLB = () => lightbox.classList.remove('open');
+  closeBtn.addEventListener('click', closeLB);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLB(); });
+
+  /* ── Плавающие сердечки ── */
+  setInterval(() => {
+    const h = document.createElement('div');
+    h.className = 'floating-heart';
+    h.textContent = ['❤️','💕','💖','✨','🌸'][Math.floor(Math.random()*5)];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.fontSize = (12 + Math.random() * 12) + 'px';
+    h.style.animationDuration = (7 + Math.random() * 6) + 's';
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 14000);
+  }, 2000);
+
+  /* ── Письмо ── */
+  const lBtn = document.getElementById('letter-btn');
+  const lModal = document.getElementById('letter-modal');
+  const lClose = document.querySelector('.letter-close');
+
+  lBtn.addEventListener('click', () => lModal.classList.add('open'));
+  lClose.addEventListener('click', () => lModal.classList.remove('open'));
+  lModal.addEventListener('click', (e) => { if (e.target === lModal) lModal.classList.remove('open'); });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeLB(); lModal.classList.remove('open'); }
+  });
+</script>
+</body>
+</html>
