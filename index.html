@@ -3,817 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101113">
-  <title>Трое свободны — календарь друзей</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0c0d0f;
-      --surface: #131518;
-      --surface-raised: #191b1f;
-      --line: #292c31;
-      --line-strong: #3a3e45;
-      --text: #f3f4f6;
-      --muted: #8c929c;
-      --success: #42d47c;
-      --friend-1: #ffb454;
-      --friend-2: #65a7ff;
-      --friend-3: #c083ff;
-      --radius: 16px;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      min-width: 320px;
-      min-height: 100vh;
-      margin: 0;
-      background:
-        radial-gradient(circle at 50% -20%, rgba(101, 167, 255, 0.08), transparent 34rem),
-        var(--bg);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    button { font: inherit; }
-
-    .app {
-      width: min(1100px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 44px 0 56px;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 26px;
-    }
-
-    .eyebrow {
-      margin: 0 0 8px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(28px, 5vw, 44px);
-      font-weight: 650;
-      letter-spacing: -0.04em;
-      line-height: 1;
-    }
-
-    .reset-button,
-    .month-button,
-    .friend-button {
-      border: 1px solid var(--line);
-      color: var(--text);
-      background: var(--surface);
-      cursor: pointer;
-      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
-    }
-
-    .reset-button:hover,
-    .month-button:hover,
-    .friend-button:hover { border-color: var(--line-strong); background: var(--surface-raised); }
-
-    button:active { transform: translateY(1px); }
-    button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-
-    .reset-button {
-      padding: 10px 14px;
-      border-radius: 10px;
-      color: #c7cbd1;
-      font-size: 13px;
-    }
-
-    .panel {
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: rgba(19, 21, 24, 0.92);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 22px;
-      padding: 20px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .control-hint { margin: 0; color: var(--muted); font-size: 13px; }
-
-    .friend-switcher { display: flex; flex-wrap: wrap; gap: 8px; }
-
-    .friend-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      min-height: 40px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      color: #b8bdc5;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .friend-button[aria-pressed="true"] {
-      border-color: color-mix(in srgb, var(--friend-color) 60%, #34373d);
-      background: color-mix(in srgb, var(--friend-color) 12%, var(--surface));
-      color: var(--text);
-    }
-
-    .avatar {
-      display: grid;
-      width: 22px;
-      height: 22px;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--friend-color);
-      color: #101113;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .month-nav { display: flex; align-items: center; gap: 8px; }
-
-    .month-label {
-      width: 170px;
-      margin: 0;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 650;
-      text-transform: capitalize;
-    }
-
-    .month-button {
-      display: grid;
-      width: 40px;
-      height: 40px;
-      padding: 0;
-      place-items: center;
-      border-radius: 10px;
-      font-size: 22px;
-      line-height: 1;
-    }
-
-    .calendar-wrap { padding: 16px; }
-
-    .weekdays,
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 7px;
-    }
-
-    .weekdays { margin-bottom: 7px; }
-
-    .weekday {
-      padding: 8px 4px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    .day {
-      position: relative;
-      min-width: 0;
-      min-height: 98px;
-      padding: 11px;
-      border: 1px solid var(--line);
-      border-radius: 11px;
-      background: #111316;
-      color: var(--text);
-      text-align: left;
-      cursor: pointer;
-      transition: background 140ms ease, border-color 140ms ease, opacity 140ms ease;
-    }
-
-    .day:hover { border-color: var(--line-strong); background: #17191d; }
-    .day:focus-visible { z-index: 2; outline: 2px solid #fff; outline-offset: 2px; }
-    .day.outside { opacity: 0.34; }
-    .day.today .day-number { color: #0e1012; background: var(--text); }
-    .day.selected { border-color: #e5e7eb; background: #1a1d21; box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
-    .day.all-free { border-color: var(--success); box-shadow: inset 0 0 0 1px rgba(66, 212, 124, 0.28); }
-    .day.selected.all-free { box-shadow: inset 0 0 0 1px rgba(66, 212, 124, 0.45), 0 0 0 1px #e5e7eb; }
-
-    .reason-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: grid;
-      width: 22px;
-      height: 22px;
-      place-items: center;
-      border-radius: 7px;
-      background: #22252a;
-      color: #b8bdc5;
-      font-size: 11px;
-    }
-
-    .day-number {
-      display: grid;
-      width: 26px;
-      height: 26px;
-      place-items: center;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .indicators {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      left: 10px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 4px;
-    }
-
-    .indicator {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 0;
-    }
-
-    .status-mark {
-      position: relative;
-      display: grid;
-      width: 20px;
-      height: 20px;
-      flex: 0 0 auto;
-      place-items: center;
-      border: 1px solid var(--friend-color);
-      border-radius: 6px;
-      color: var(--friend-color);
-      font-size: 9px;
-      font-weight: 850;
-      line-height: 1;
-      opacity: 0.42;
-    }
-
-    .indicator[data-status="free"] .status-mark { border-color: transparent; background: var(--friend-color); color: #101113; opacity: 1; }
-    .indicator[data-status="busy"] .status-mark { background: color-mix(in srgb, var(--friend-color) 14%, transparent); opacity: 0.9; }
-
-    .indicator[data-status="busy"] .status-mark::after {
-      content: "";
-      position: absolute;
-      width: 14px;
-      height: 1px;
-      border-radius: 1px;
-      background: var(--friend-color);
-      transform: rotate(-45deg);
-    }
-
-    .status-label { display: none; }
-
-    .indicator[data-status="free"] .status-label { color: #c9ced5; }
-    .indicator[data-status="busy"] .status-label { color: #8c929c; text-decoration: line-through; }
-
-    .footer-note {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      padding: 15px 20px;
-      border-top: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .legend { display: flex; flex-wrap: wrap; gap: 15px; }
-    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
-    .legend-mark { width: 7px; height: 7px; border-radius: 50%; background: #b7bcc4; }
-    .legend-mark.busy { border-radius: 2px; opacity: 0.55; transform: rotate(45deg) scale(0.82); }
-    .legend-mark.empty { border: 1px solid #777d86; background: transparent; opacity: 0.55; }
-    .legend-mark.match { border: 1px solid var(--success); border-radius: 3px; background: transparent; }
-
-    .save-state { white-space: nowrap; }
-
-    .reason-dialog {
-      width: min(440px, calc(100% - 28px));
-      padding: 0;
-      border: 1px solid var(--line-strong);
-      border-radius: 16px;
-      background: var(--surface);
-      color: var(--text);
-      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.65);
-    }
-
-    .reason-dialog::backdrop { background: rgba(5, 6, 7, 0.76); backdrop-filter: blur(4px); }
-    .reason-form { padding: 22px; }
-    .reason-form h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: -0.02em; }
-    .reason-meta { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
-    .reason-form label { display: block; margin-bottom: 8px; color: #c9ced5; font-size: 13px; font-weight: 650; }
-
-    .reason-input {
-      width: 100%;
-      min-height: 110px;
-      resize: vertical;
-      padding: 12px 13px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      outline: none;
-      background: #0f1113;
-      color: var(--text);
-      font: inherit;
-      line-height: 1.45;
-    }
-
-    .reason-input:focus { border-color: #7c838d; box-shadow: 0 0 0 3px rgba(124, 131, 141, 0.12); }
-    .reason-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-
-    .dialog-button {
-      min-height: 39px;
-      padding: 8px 13px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: #191b1f;
-      color: var(--text);
-      cursor: pointer;
-    }
-
-    .dialog-button:hover { border-color: var(--line-strong); background: #202328; }
-    .dialog-button.danger { margin-right: auto; color: #ff9a9a; }
-    .dialog-button.primary { border-color: #e5e7eb; background: #e5e7eb; color: #111316; font-weight: 700; }
-
-    .calendar-layout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; align-items: stretch; }
-    .day-details { padding: 20px; border-left: 1px solid var(--line); background: #101215; }
-    .details-kicker { margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
-    .details-title { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -.025em; text-transform: capitalize; }
-    .details-summary { min-height: 20px; margin: 7px 0 20px; color: var(--muted); font-size: 13px; }
-    .details-summary.match { color: var(--success); }
-    .friend-details-list { display: grid; gap: 10px; }
-
-    .friend-card { padding: 13px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-    .friend-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 11px; }
-    .friend-dot { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: var(--friend-color); }
-    .friend-card-name { font-size: 13px; font-weight: 700; }
-    .friend-card-status { margin-left: auto; color: var(--muted); font-size: 11px; }
-
-    .status-switch { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 3px; border-radius: 9px; background: #0e1012; }
-    .status-option { min-width: 0; padding: 7px 4px; border: 0; border-radius: 7px; background: transparent; color: #777d86; cursor: pointer; font-size: 10px; font-weight: 700; }
-    .status-option:hover { color: #c9ced5; }
-    .status-option.active { background: #26292f; color: var(--text); }
-    .status-option[data-status="free"].active { color: var(--friend-color); }
-    .status-option[data-status="busy"].active { color: #ffadad; }
-
-    .reason-preview { margin-top: 10px; padding: 10px; border: 1px solid #292c31; border-radius: 9px; background: #0e1012; }
-    .reason-preview-label { margin: 0 0 5px; color: #777d86; font-size: 10px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
-    .reason-preview-text { margin: 0; color: #d6d9de; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
-    .reason-preview-text.empty { color: #6f747c; font-style: italic; }
-    .edit-reason { width: 100%; margin-top: 8px; padding: 7px; border: 1px solid var(--line); border-radius: 8px; background: #17191d; color: #c8ccd2; cursor: pointer; font-size: 11px; font-weight: 700; }
-    .edit-reason:hover { border-color: var(--line-strong); color: var(--text); }
-
-    @media (max-width: 760px) {
-      .app { width: min(100% - 16px, 680px); padding: 20px 0 32px; }
-      .topbar { align-items: center; margin-bottom: 18px; }
-      .controls { align-items: stretch; flex-direction: column-reverse; }
-      .month-nav { justify-content: space-between; }
-      .control-hint { text-align: center; }
-      .month-button { width: 44px; height: 44px; }
-      .calendar-wrap { padding: 8px; overflow: hidden; }
-      .weekdays, .calendar-grid { gap: 4px; }
-      .day { min-height: 82px; padding: 7px; border-radius: 9px; }
-      .indicators { right: 7px; bottom: 7px; left: 7px; gap: 3px; }
-      .status-mark { width: 18px; height: 18px; border-radius: 5px; }
-      .footer-note { align-items: flex-start; flex-direction: column; }
-      .save-state { align-self: flex-end; }
-      .calendar-layout { grid-template-columns: 1fr; }
-      .day-details { scroll-margin-top: 8px; border-top: 1px solid var(--line); border-left: 0; }
-      .friend-details-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .status-option { min-height: 40px; }
-    }
-
-    @media (max-width: 620px) {
-      .friend-details-list { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 430px) {
-      .app { width: 100%; padding: 16px 0 24px; }
-      .topbar { align-items: center; margin-bottom: 14px; padding: 0 12px; }
-      .eyebrow { margin-bottom: 5px; font-size: 10px; }
-      h1 { font-size: 25px; }
-      .reset-button { min-height: 38px; padding: 7px 9px; font-size: 0; }
-      .reset-button::after { content: "Сброс"; font-size: 12px; }
-      .panel { border-right: 0; border-left: 0; border-radius: 0; }
-      .controls { padding: 10px 12px; gap: 0; }
-      .control-hint { display: none; }
-      .month-label { width: auto; font-size: 15px; }
-      .calendar-wrap { padding: 7px 5px 9px; }
-      .weekdays, .calendar-grid { gap: 3px; }
-      .weekday { padding: 6px 1px; font-size: 8px; letter-spacing: .03em; }
-      .day { min-height: 62px; padding: 4px; border-radius: 7px; }
-      .day-number { width: 21px; height: 21px; border-radius: 6px; font-size: 11px; }
-      .indicators { right: 4px; bottom: 5px; left: 4px; gap: 1px; }
-      .status-mark { width: 9px; height: 9px; border-radius: 3px; font-size: 0; }
-      .indicator[data-status="busy"] .status-mark::after { width: 7px; }
-      .reason-badge { top: 4px; right: 4px; width: 15px; height: 15px; border-radius: 4px; font-size: 8px; }
-      .day-details { padding: 18px 12px 20px; }
-      .details-title { font-size: 20px; }
-      .details-summary { margin-bottom: 14px; }
-      .friend-card { padding: 12px; }
-      .status-option { min-height: 44px; padding: 7px 2px; font-size: 10px; }
-      .footer-note { gap: 12px; padding: 13px 12px; }
-      .legend { display: grid; width: 100%; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
-      .save-state { align-self: flex-start; }
-      .reason-dialog { inset: auto 0 0; width: 100%; max-width: none; max-height: calc(100dvh - 16px); margin: 0; border-right: 0; border-bottom: 0; border-left: 0; border-radius: 18px 18px 0 0; }
-      .reason-form { padding: 20px 16px calc(18px + env(safe-area-inset-bottom)); }
-      .reason-input { min-height: 120px; }
-      .reason-actions { flex-wrap: wrap; }
-      .dialog-button { min-height: 44px; }
-      .dialog-button.danger { width: 100%; margin: 0 0 4px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
-    }
-  </style>
+  <meta name="description" content="Небольшая история о большой нежности — сделано специально для тебя.">
+  <meta name="theme-color" content="#f7efe9">
+  <title>Для тебя ♡</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.88em' font-size='86'>♡</text></svg>">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Общий календарь</p>
-        <h1>Трое свободны</h1>
+  <div class="loader" aria-hidden="true">
+    <div class="loader-heart">♡</div>
+    <p>собираю нежность по кусочкам</p>
+  </div>
+
+  <div class="cursor" aria-hidden="true"></div>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="logo" href="#top" aria-label="В начало">для тебя <span>♡</span></a>
+    <nav aria-label="Главная навигация">
+      <a href="#about">о тебе</a>
+      <a href="#gallery">моменты</a>
+      <a href="#letter">послание</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow reveal">маленький сайт о большой нежности</p>
+        <h1 class="reveal">Ты — моё любимое<br><em>«вау»</em></h1>
+        <p class="hero-note reveal">Некоторые люди делают мир теплее просто тем, что они в нём есть. Этот сайт — напоминание, что ты именно такая.</p>
+        <a class="soft-button reveal" href="#about">листать историю <span>↓</span></a>
       </div>
-      <button class="reset-button" id="resetButton" type="button">Сбросить данные</button>
-    </header>
 
-    <section class="panel" aria-label="Календарь занятости друзей">
-      <div class="controls">
-        <p class="control-hint">Выберите день, чтобы посмотреть статусы и причины</p>
-
-        <nav class="month-nav" aria-label="Навигация по месяцам">
-          <button class="month-button" id="prevMonth" type="button" aria-label="Предыдущий месяц">‹</button>
-          <h2 class="month-label" id="monthLabel" aria-live="polite"></h2>
-          <button class="month-button" id="nextMonth" type="button" aria-label="Следующий месяц">›</button>
-        </nav>
+      <div class="hero-visual" aria-label="Фотографии самой прекрасной девушки">
+        <div class="sun-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+        <figure class="photo-frame hero-main reveal" data-tilt>
+          <img src="photos/1.jpg" srcset="photos/mobile/1.jpg 900w, photos/1.jpg 1600w" sizes="(max-width: 640px) 82vw, 450px" alt="Портрет в солнечных лучах" decoding="async" fetchpriority="high">
+          <figcaption>свет тебе очень идёт</figcaption>
+        </figure>
+        <figure class="photo-frame hero-small hero-small-top reveal" data-tilt>
+          <img src="photos/7.jpg" srcset="photos/mobile/7.jpg 900w, photos/7.jpg 1280w" sizes="(max-width: 640px) 29vw, 200px" alt="Солнечный день в парке" decoding="async">
+        </figure>
+        <figure class="photo-frame hero-small hero-small-bottom reveal" data-tilt>
+          <img src="photos/8.jpg" srcset="photos/mobile/8.jpg 900w, photos/8.jpg 1200w" sizes="(max-width: 640px) 29vw, 200px" alt="Прогулка в парке" decoding="async">
+        </figure>
+        <span class="handwritten hero-word">невероятная</span>
       </div>
 
-      <div class="calendar-layout">
-        <div class="calendar-wrap">
-          <div class="weekdays" aria-hidden="true">
-            <div class="weekday">Пн</div><div class="weekday">Вт</div><div class="weekday">Ср</div>
-            <div class="weekday">Чт</div><div class="weekday">Пт</div><div class="weekday">Сб</div>
-            <div class="weekday">Вс</div>
-          </div>
-          <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Дни месяца"></div>
+      <div class="scroll-hint" aria-hidden="true"><span></span> листай</div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>восхищаюсь тобой ✦</span><span>твоими глазами ♡</span><span>твоей улыбкой ✦</span><span>твоей красотой ♡</span>
+        <span>восхищаюсь тобой ✦</span><span>твоими глазами ♡</span><span>твоей улыбкой ✦</span><span>твоей красотой ♡</span>
+      </div>
+    </div>
+
+    <section class="about section" id="about">
+      <div class="section-number reveal">01 / О тебе</div>
+      <div class="about-layout">
+        <p class="about-lead reveal">В тебе удивительно сочетаются <em>нежность</em> и характер, спокойствие и та самая искра, которую невозможно не заметить.</p>
+        <div class="about-side reveal">
+          <span class="tiny-flower" aria-hidden="true">✿</span>
+          <p>Ты умеешь превращать обычный момент в тот, который хочется запомнить. Поэтому здесь собраны маленькие кадры — каждый со своим настроением.</p>
         </div>
-        <aside class="day-details" id="dayDetails" aria-live="polite"></aside>
+      </div>
+      <div class="qualities" aria-label="Три слова о тебе">
+        <article class="quality reveal"><span>01</span><h3>Красивая</h3><p>Не только внешне. Хотя тут, конечно, без шансов для остальных.</p></article>
+        <article class="quality reveal"><span>02</span><h3>Настоящая</h3><p>Со своим взглядом, настроением и особенной магией.</p></article>
+        <article class="quality reveal"><span>03</span><h3>Особенная</h3><p>Таких людей не ищут специально — их просто однажды встречают.</p></article>
+      </div>
+    </section>
+
+    <section class="gallery-section section" id="gallery">
+      <div class="gallery-heading">
+        <div>
+          <div class="section-number reveal">02 / Моменты</div>
+          <h2 class="reveal">Восемь кадров.<br><em>Одна ты.</em></h2>
+        </div>
+        <p class="reveal">Нажми на фотографию, чтобы рассмотреть её поближе. Но осторожно: можно залипнуть.</p>
       </div>
 
-      <footer class="footer-note">
-        <div class="legend" aria-label="Обозначения статусов">
-          <span class="legend-item"><i class="legend-mark"></i>Свободен</span>
-          <span class="legend-item"><i class="legend-mark busy"></i>Занят</span>
-          <span class="legend-item"><i class="legend-mark empty"></i>Не указано</span>
-          <span class="legend-item"><i class="legend-mark match"></i>Все свободны</span>
-        </div>
-        <span class="save-state" id="saveState">Сохраняется автоматически</span>
-      </footer>
+      <div class="photo-grid">
+        <button class="gallery-card tall reveal" type="button" data-image="photos/2.jpg" data-caption="Взгляд, в котором целая история">
+          <img src="photos/2.jpg" srcset="photos/mobile/2.jpg 900w, photos/2.jpg 1338w" sizes="(max-width: 640px) 82vw, 34vw" loading="lazy" decoding="async" alt="Нежный портрет">
+          <span><b>01</b> тот самый взгляд</span>
+        </button>
+        <button class="gallery-card wide reveal" type="button" data-image="photos/3.jpg" data-caption="Красота в самых тихих моментах">
+          <img src="photos/3.jpg" srcset="photos/mobile/3.jpg 900w, photos/3.jpg 1361w" sizes="(max-width: 640px) 82vw, 66vw" loading="lazy" decoding="async" alt="Светлый портрет">
+          <span><b>02</b> нежность</span>
+        </button>
+        <button class="gallery-card reveal" type="button" data-image="photos/4.jpg" data-caption="Немного дерзости тебе очень к лицу">
+          <img src="photos/4.jpg" srcset="photos/mobile/4.jpg 900w, photos/4.jpg 1440w" sizes="(max-width: 640px) 82vw, 34vw" loading="lazy" decoding="async" alt="Портрет на прогулке">
+          <span><b>03</b> характер</span>
+        </button>
+        <button class="gallery-card dark reveal" type="button" data-image="photos/5.jpg" data-caption="Даже в полумраке — самый яркий человек">
+          <img src="photos/5.jpg" srcset="photos/mobile/5.jpg 900w, photos/5.jpg 1440w" sizes="(max-width: 640px) 82vw, 34vw" loading="lazy" decoding="async" alt="Вечерний портрет">
+          <span><b>04</b> настроение</span>
+        </button>
+        <button class="gallery-card tall reveal" type="button" data-image="photos/6.jpg" data-caption="Остановить мгновение, чтобы запомнить">
+          <img src="photos/6.jpg" srcset="photos/mobile/6.jpg 900w, photos/6.jpg 1200w" sizes="(max-width: 640px) 82vw, 34vw" loading="lazy" decoding="async" alt="Селфи в зеркале">
+          <span><b>05</b> стиль</span>
+        </button>
+        <button class="gallery-card reveal" type="button" data-image="photos/7.jpg" data-caption="Золотой час будто создан для тебя">
+          <img src="photos/7.jpg" srcset="photos/mobile/7.jpg 900w, photos/7.jpg 1280w" sizes="(max-width: 640px) 82vw, 34vw" loading="lazy" decoding="async" alt="Девушка в лучах солнца">
+          <span><b>06</b> солнечная</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="pause-section" aria-label="Красивое напоминание">
+      <div class="pause-image" role="img" aria-label="Прогулка в солнечном парке"></div>
+      <div class="pause-overlay"></div>
+      <div class="pause-copy reveal">
+        <span>маленькое напоминание</span>
+        <h2>Ты прекрасна.<br>Без условий.</h2>
+        <p>Не только в удачном свете, не только на любимых фото — всегда.</p>
+      </div>
+    </section>
+
+    <section class="letter-section section" id="letter">
+      <div class="letter-copy">
+        <div class="section-number reveal">03 / Только для тебя</div>
+        <h2 class="reveal">Здесь спрятано<br><em>одно послание</em></h2>
+        <p class="reveal">Открой, когда захочется улыбнуться. Оно никуда не исчезнет.</p>
+      </div>
+
+      <div class="envelope-wrap reveal">
+        <button class="envelope" type="button" aria-expanded="false" aria-controls="secret-note">
+          <span class="envelope-back"></span>
+          <span class="letter-paper" id="secret-note">
+            <span class="letter-kicker">для тебя ♡</span>
+            <strong>Спасибо, что ты есть.</strong>
+            <span>Пусть у тебя всегда будет миллион поводов улыбаться, а рядом — люди, которые видят, какая ты невероятная.</span>
+            <i>и это только начало…</i>
+          </span>
+          <span class="envelope-front"></span>
+          <span class="envelope-flap"></span>
+          <span class="wax">♡</span>
+        </button>
+        <p class="envelope-hint">нажми на конверт</p>
+      </div>
+    </section>
+
+    <section class="finale">
+      <div class="finale-stars" aria-hidden="true"></div>
+      <p class="reveal">Если бы красота была моментом,</p>
+      <h2 class="reveal">то это был бы момент<br><em>с тобой.</em></h2>
+      <button class="heart-button reveal" type="button" id="heartBurst">нажми сюда <span>♡</span></button>
+      <p class="final-whisper" id="finalWhisper" aria-live="polite">ты — чудо</p>
     </section>
   </main>
 
-  <dialog class="reason-dialog" id="reasonDialog" aria-labelledby="reasonTitle">
-    <form class="reason-form" id="reasonForm" method="dialog">
-      <h3 id="reasonTitle">Почему не получается?</h3>
-      <p class="reason-meta" id="reasonMeta"></p>
-      <label for="reasonInput">Причина занятости</label>
-      <textarea class="reason-input" id="reasonInput" maxlength="240" placeholder="Например: работаю допоздна"></textarea>
-      <div class="reason-actions">
-        <button class="dialog-button danger" id="clearBusyButton" type="button">Снять занятость</button>
-        <button class="dialog-button" value="cancel" type="button" id="cancelReasonButton">Отмена</button>
-        <button class="dialog-button primary" value="save" type="submit">Сохранить</button>
-      </div>
-    </form>
+  <footer>
+    <span>сделано с теплом</span>
+    <span>специально для тебя · 2026</span>
+    <a href="#top">наверх ↑</a>
+  </footer>
+
+  <dialog class="lightbox" aria-label="Просмотр фотографии">
+    <button class="lightbox-close" type="button" aria-label="Закрыть">×</button>
+    <button class="lightbox-nav prev" type="button" aria-label="Предыдущая фотография">←</button>
+    <figure>
+      <img src="" alt="">
+      <figcaption></figcaption>
+    </figure>
+    <button class="lightbox-nav next" type="button" aria-label="Следующая фотография">→</button>
   </dialog>
 
-  <script>
-    (() => {
-      'use strict';
-
-      // Все пользовательские настройки и статусы хранятся под одним ключом.
-      const STORAGE_KEY = 'three-friends-calendar-v1';
-      const friends = [
-        { id: 'friend1', name: 'Влад', color: 'var(--friend-1)' },
-        { id: 'friend2', name: 'Ден', color: 'var(--friend-2)' },
-        { id: 'friend3', name: 'Даня', color: 'var(--friend-3)' }
-      ];
-      const statusText = { none: 'не указано', free: 'свободен', busy: 'занят' };
-      const monthFormatter = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' });
-      const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      let viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
-      let selectedDateKey = toDateKey(today);
-      let calendarData = loadData();
-
-      const grid = document.querySelector('#calendarGrid');
-      const monthLabel = document.querySelector('#monthLabel');
-      const dayDetails = document.querySelector('#dayDetails');
-      const saveState = document.querySelector('#saveState');
-      const reasonDialog = document.querySelector('#reasonDialog');
-      const reasonForm = document.querySelector('#reasonForm');
-      const reasonInput = document.querySelector('#reasonInput');
-      const reasonMeta = document.querySelector('#reasonMeta');
-      let editedReasonDateKey = null;
-      let editedFriendId = null;
-
-      function loadData() {
-        try {
-          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          return parsed && typeof parsed === 'object' ? parsed : {};
-        } catch (error) {
-          console.warn('Не удалось прочитать сохранённый календарь:', error);
-          return {};
-        }
-      }
-
-      function saveData() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(calendarData));
-          saveState.textContent = 'Сохранено';
-          window.clearTimeout(saveData.timer);
-          saveData.timer = window.setTimeout(() => {
-            saveState.textContent = 'Сохраняется автоматически';
-          }, 1300);
-        } catch (error) {
-          saveState.textContent = 'Не удалось сохранить';
-          console.warn('Не удалось сохранить календарь:', error);
-        }
-      }
-
-      // Локальный ключ YYYY-MM-DD не зависит от часового пояса браузера.
-      function toDateKey(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-
-      function getEntry(dateKey, friendId) {
-        const entry = calendarData[dateKey]?.[friendId];
-        if (!entry) return { status: 'none', reason: '' };
-        // Поддержка данных, сохранённых в первой версии календаря.
-        if (typeof entry === 'string') return { status: entry, reason: '' };
-        return { status: entry.status || 'none', reason: entry.reason || '' };
-      }
-
-      function getStatus(dateKey, friendId) {
-        return getEntry(dateKey, friendId).status;
-      }
-
-      function getReason(dateKey, friendId) {
-        return getEntry(dateKey, friendId).reason;
-      }
-
-      function openReasonEditor(dateKey, friendId) {
-        const friend = friends.find(item => item.id === friendId);
-        const [year, month, day] = dateKey.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        editedReasonDateKey = dateKey;
-        editedFriendId = friendId;
-        reasonMeta.textContent = `${friend.name} · ${dateFormatter.format(date)}`;
-        reasonInput.value = getReason(dateKey, friendId);
-        reasonDialog.showModal();
-        window.setTimeout(() => reasonInput.focus(), 0);
-      }
-
-      function setStatus(dateKey, friendId, nextStatus) {
-        if (!calendarData[dateKey]) calendarData[dateKey] = {};
-
-        if (nextStatus === 'none') {
-          delete calendarData[dateKey][friendId];
-          if (Object.keys(calendarData[dateKey]).length === 0) delete calendarData[dateKey];
-        } else {
-          const previousReason = getReason(dateKey, friendId);
-          calendarData[dateKey][friendId] = {
-            status: nextStatus,
-            reason: nextStatus === 'busy' ? previousReason : ''
-          };
-        }
-
-        saveData();
-        renderCalendar();
-        renderDetails();
-        if (nextStatus === 'busy' && !getReason(dateKey, friendId)) openReasonEditor(dateKey, friendId);
-      }
-
-      function renderDetails() {
-        const [year, month, day] = selectedDateKey.split('-').map(Number);
-        const selectedDate = new Date(year, month - 1, day);
-        const allFree = friends.every(friend => getStatus(selectedDateKey, friend.id) === 'free');
-
-        const kicker = document.createElement('p');
-        kicker.className = 'details-kicker';
-        kicker.textContent = 'Выбранный день';
-
-        const title = document.createElement('h3');
-        title.className = 'details-title';
-        title.textContent = dateFormatter.format(selectedDate);
-
-        const summary = document.createElement('p');
-        summary.className = `details-summary${allFree ? ' match' : ''}`;
-        summary.textContent = allFree ? 'Все трое свободны — можно встречаться' : 'Статусы и причины друзей';
-
-        const list = document.createElement('div');
-        list.className = 'friend-details-list';
-
-        friends.forEach(friend => {
-          const status = getStatus(selectedDateKey, friend.id);
-          const reason = getReason(selectedDateKey, friend.id);
-          const card = document.createElement('section');
-          card.className = 'friend-card';
-          card.style.setProperty('--friend-color', friend.color);
-
-          const head = document.createElement('div');
-          head.className = 'friend-card-head';
-          head.innerHTML = `<span class="friend-dot" aria-hidden="true"></span><span class="friend-card-name">${friend.name}</span><span class="friend-card-status">${statusText[status]}</span>`;
-
-          const statusSwitch = document.createElement('div');
-          statusSwitch.className = 'status-switch';
-          statusSwitch.setAttribute('aria-label', `Статус: ${friend.name}`);
-          [
-            ['none', 'Не указано'],
-            ['free', 'Свободен'],
-            ['busy', 'Занят']
-          ].forEach(([value, label]) => {
-            const option = document.createElement('button');
-            option.type = 'button';
-            option.className = `status-option${status === value ? ' active' : ''}`;
-            option.dataset.status = value;
-            option.setAttribute('aria-pressed', String(status === value));
-            option.textContent = label;
-            option.addEventListener('click', () => setStatus(selectedDateKey, friend.id, value));
-            statusSwitch.append(option);
-          });
-
-          card.append(head, statusSwitch);
-
-          if (status === 'busy') {
-            const preview = document.createElement('div');
-            preview.className = 'reason-preview';
-
-            const label = document.createElement('p');
-            label.className = 'reason-preview-label';
-            label.textContent = 'Причина';
-
-            const text = document.createElement('p');
-            text.className = `reason-preview-text${reason ? '' : ' empty'}`;
-            text.textContent = reason || 'Причина пока не указана';
-
-            const edit = document.createElement('button');
-            edit.type = 'button';
-            edit.className = 'edit-reason';
-            edit.textContent = reason ? 'Изменить причину' : 'Добавить причину';
-            edit.addEventListener('click', () => openReasonEditor(selectedDateKey, friend.id));
-
-            preview.append(label, text, edit);
-            card.append(preview);
-          }
-
-          list.append(card);
-        });
-
-        dayDetails.replaceChildren(kicker, title, summary, list);
-      }
-
-      function createIndicator(friend, dateKey) {
-        const status = getStatus(dateKey, friend.id);
-        const reason = getReason(dateKey, friend.id);
-        const row = document.createElement('div');
-        row.className = 'indicator';
-        row.dataset.status = status;
-        row.style.setProperty('--friend-color', friend.color);
-        row.title = `${friend.name}: ${statusText[status]}${reason ? ` — ${reason}` : ''}`;
-        row.innerHTML = `<span class="status-mark" aria-hidden="true">${friends.indexOf(friend) + 1}</span><span class="status-label">${friend.name}</span>`;
-        return row;
-      }
-
-      function renderCalendar() {
-        monthLabel.textContent = monthFormatter.format(viewDate);
-
-        // Преобразуем воскресенье (0) в последний день недели (6).
-        const firstDayOffset = (viewDate.getDay() + 6) % 7;
-        const firstCellDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1 - firstDayOffset);
-        const cells = [];
-
-        // Всегда создаём ровно 42 ячейки: 7 столбцов × 6 строк.
-        for (let index = 0; index < 42; index += 1) {
-          const date = new Date(firstCellDate);
-          date.setDate(firstCellDate.getDate() + index);
-          const dateKey = toDateKey(date);
-          const isCurrentMonth = date.getMonth() === viewDate.getMonth();
-          const isToday = date.getTime() === today.getTime();
-          const allFree = friends.every(friend => getStatus(dateKey, friend.id) === 'free');
-          const hasReason = friends.some(friend => Boolean(getReason(dateKey, friend.id)));
-          const statusSummary = friends.map(friend => `${friend.name}: ${statusText[getStatus(dateKey, friend.id)]}`).join('. ');
-
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = ['day', !isCurrentMonth && 'outside', isToday && 'today', dateKey === selectedDateKey && 'selected', allFree && 'all-free'].filter(Boolean).join(' ');
-          button.setAttribute('role', 'gridcell');
-          button.setAttribute('aria-selected', String(dateKey === selectedDateKey));
-          button.setAttribute('aria-label', `${dateFormatter.format(date)}. ${statusSummary}. Нажмите, чтобы посмотреть подробности.`);
-          button.innerHTML = `<span class="day-number">${date.getDate()}</span>`;
-
-          if (hasReason) {
-            const badge = document.createElement('span');
-            badge.className = 'reason-badge';
-            badge.title = 'Есть причина занятости';
-            badge.setAttribute('aria-hidden', 'true');
-            badge.textContent = '✎';
-            button.append(badge);
-          }
-
-          const indicators = document.createElement('div');
-          indicators.className = 'indicators';
-          friends.forEach(friend => indicators.append(createIndicator(friend, dateKey)));
-          button.append(indicators);
-          button.addEventListener('click', () => {
-            selectedDateKey = dateKey;
-            if (!isCurrentMonth) viewDate = new Date(date.getFullYear(), date.getMonth(), 1);
-            renderCalendar();
-            renderDetails();
-            // На телефоне сразу показываем подробности выбранного дня.
-            if (window.matchMedia('(max-width: 760px)').matches) {
-              window.requestAnimationFrame(() => {
-                dayDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              });
-            }
-          });
-          cells.push(button);
-        }
-
-        grid.replaceChildren(...cells);
-      }
-
-      function changeMonth(delta) {
-        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + delta, 1);
-        selectedDateKey = toDateKey(viewDate);
-        renderCalendar();
-        renderDetails();
-      }
-
-      document.querySelector('#prevMonth').addEventListener('click', () => changeMonth(-1));
-      document.querySelector('#nextMonth').addEventListener('click', () => changeMonth(1));
-      document.querySelector('#cancelReasonButton').addEventListener('click', () => reasonDialog.close());
-      document.querySelector('#clearBusyButton').addEventListener('click', () => {
-        if (!editedReasonDateKey || !editedFriendId || !calendarData[editedReasonDateKey]) return;
-        delete calendarData[editedReasonDateKey][editedFriendId];
-        if (Object.keys(calendarData[editedReasonDateKey]).length === 0) delete calendarData[editedReasonDateKey];
-        saveData();
-        reasonDialog.close();
-        renderCalendar();
-        renderDetails();
-      });
-
-      reasonForm.addEventListener('submit', event => {
-        event.preventDefault();
-        if (!editedReasonDateKey || !editedFriendId) return;
-        if (!calendarData[editedReasonDateKey]) calendarData[editedReasonDateKey] = {};
-        calendarData[editedReasonDateKey][editedFriendId] = {
-          status: 'busy',
-          reason: reasonInput.value.trim()
-        };
-        saveData();
-        reasonDialog.close();
-        renderCalendar();
-        renderDetails();
-      });
-
-      reasonDialog.addEventListener('close', () => {
-        editedReasonDateKey = null;
-        editedFriendId = null;
-      });
-      document.querySelector('#resetButton').addEventListener('click', () => {
-        if (!window.confirm('Удалить все отмеченные статусы? Это действие нельзя отменить.')) return;
-        calendarData = {};
-        localStorage.removeItem(STORAGE_KEY);
-        renderCalendar();
-        renderDetails();
-        saveState.textContent = 'Данные сброшены';
-      });
-
-      renderCalendar();
-      renderDetails();
-    })();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
